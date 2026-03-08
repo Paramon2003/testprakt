@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:testprakt/features/first_screen/presentation/pages/results.dart';
 import '../widgets/contentblocks.dart';
 
 class TestFinish extends StatelessWidget {
-  const TestFinish({super.key});
+  final String authToken;
+
+  const TestFinish({super.key, required this.authToken});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +96,11 @@ class TestFinish extends StatelessWidget {
               child: Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/results');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Results(authToken: authToken)),
+                    );
+                    //Navigator.pushNamed(context, '/results');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6C05),

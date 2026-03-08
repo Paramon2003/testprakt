@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../pages/testnext.dart'; // импорт нового экрана
+import '../pages/testnext.dart';
 
 class Test extends StatelessWidget {
   final Widget child;
@@ -9,6 +9,7 @@ class Test extends StatelessWidget {
   final String token;
   final String? questionId;
   final int questionNumber;
+  final bool isLoading;
 
   const Test({
     super.key,
@@ -17,9 +18,10 @@ class Test extends StatelessWidget {
     required this.token,
     this.questionId,
     required this.questionNumber,
+    required this.isLoading,
   });
 
-  // Функция отправки ответа на сервер
+
   Future<void> sendAnswer(String token, String questionId, String option) async {
     final response = await http.post(
       Uri.parse('http://109.172.7.214:8080/api/v1/answer'),
@@ -41,6 +43,9 @@ class Test extends StatelessWidget {
   }
 
   void navigateWithSwipe(BuildContext context, bool swipedLeft, String token) async {
+    if (isLoading || questionId == null) {
+      return;
+    }
     if (questionId != null) {
       // Отправляем ответ в зависимости от свайпа
       await sendAnswer(token, questionId!, swipedLeft ? 'no' : 'yes'); // 'no' для влево, 'yes' для вправо
@@ -67,6 +72,7 @@ class Test extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onHorizontalDragEnd: (details) {
+        if (isLoading) return;
         if (details.primaryVelocity == null) return;
         if (details.primaryVelocity! < -100) {
           // Свайп влево
@@ -82,29 +88,6 @@ class Test extends StatelessWidget {
             child: Image(
               image: AssetImage('assets/fon2.png'),
               fit: BoxFit.cover,
-            ),
-          ),
-
-          Positioned(
-            top: 20,
-            left: 20,
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () {
-
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6C05),
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(20),
-                ),
-                child: const Text('➜',
-                  style: TextStyle(
-                    fontFamily: 'Gilroy',
-                    fontSize: 24,
-                    color: Colors.black,
-                  ),),
-              ),
             ),
           ),
 
@@ -162,6 +145,7 @@ class Test extends StatelessWidget {
             child: Center(
               child: ElevatedButton(
                 onPressed: () async {
+                  if (isLoading || questionId == null) return;
                   if (questionId != null) {
                     await sendAnswer(token, questionId!, 'yes'); // Отправляем ответ
                   }
@@ -184,7 +168,9 @@ class Test extends StatelessWidget {
             child: Center(
               child: ElevatedButton(
                 onPressed: () async {
+                  if (isLoading || questionId == null) return;
                   if (questionId != null) {
+
                     await sendAnswer(token, questionId!, 'idk'); // Отправляем ответ
                   }
 
@@ -228,10 +214,13 @@ class Test extends StatelessWidget {
             child: Center(
               child: ElevatedButton(
                 onPressed: () async {
+                  if (isLoading || questionId == null) return;
                   if (questionId != null) {
+
                     await sendAnswer(token, questionId!, 'no'); // Отправляем ответ
                   }
                   navigateWithSwipe(context, true, token); // влево
+
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6C05),

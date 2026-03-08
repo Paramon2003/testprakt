@@ -28,9 +28,9 @@ class MyApp extends StatelessWidget {
         '/inst3': (_) => const Inst3(),
         '/gender': (_) => const Gender(),
         '/test1': (_) => const Testfirst(),
-        '/testfinish': (_) => const TestFinish(),
-        '/results': (_) => const Results(),
-        '/share': (_) => const Share(),
+        //'/testfinish': (_) => const TestFinish(),
+        //'/results': (_) => const Results(),
+        ///share': (_) => const Share(),
       },
     );
   }

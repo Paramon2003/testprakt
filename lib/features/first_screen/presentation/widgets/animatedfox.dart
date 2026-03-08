@@ -116,7 +116,7 @@ class _AnimatedFoxContainerState extends State<AnimatedFoxContainer>
     );
   }
 
-  // заменяем _buildImage
+  // заменяю _buildImage
   Widget _buildImage() {
     return Positioned(
       top: 152,

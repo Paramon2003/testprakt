@@ -1,121 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:math';
 
-class Additional extends StatelessWidget {
-  final List<String> traits = [
-    'A – первый фактор',
-    'шкала способностей к обучению',
-    'шкала зрелости',
-    'алкогольная дифференциация',
-    'черта ответственности',
-    'орг. поражение хвостатого ядра',
-    'студенческий'
-        '3 староста',
-    'контроль',
-    'соперничество',
-    'конверсионная реакция',
-    'адвокатский тип личности',
-    'цинизм',
-    'чистая депрессия',
-    'субъективная депрессия',
-    'психическая заторможенность',
-    'мрачность (угрюмость)',
-    'преступность',
-    'отрицание симптомов',
-    'доминирование',
-    'явная депрессия',
-    'преступность',
-    'депрессивные реакции',
-    'диссимуляция',
-    'мягкая депрессия',
-    'зависимость',
-    'эскапизм',
-    'эмоциональная незрелость',
-    'сверхконтроль Я (зажатость)',
-    'эпилепсия',
-    'сила Эго',
-    'оценка улучшения',
-    'женственность',
-    'общая плохая\n приспособляемость',
-    'предипохондрическое\n состояние',
-    'предрасп. к головным болям',
-    'контроль над враждебностью',
-    'сосредоточенность на здоровье',
-    'враждебность',
-    'чистая ипохондрия',
-    'выраженная враждебность',
-    'чистая истерия',
-    'вытеснение тревоги',
-    'потребность в эмоц. переживаниях',
-    'соматические жалобы',
-    'подавленная агрессия',
-    'явная истерия',
-    'скрытая истерия',
-    'интеллектуальная эффективность',
-    'импульсивность',
-    'внутренняя плохая\n приспособляемость',
-    'интеллектуальный коэффициент',
-    'осознанная тревога',
-    'комплекс осуждения (комплекс вины)',
-    'осознанная выраженная враждебность',
-    'лидерство',
-    'чистая гипомания',
-    'аморальность',
-    'психомоторная акселерация',
-    'явная гипомания',
-    'скрытая гипомания',
-    'эмоциональная сензитивность',
-    'альтруизм',
-    'женственность интересов',
-    'невротизм',
-    'невротический сверхконтроль',
-    'невротическое снижение контроля',
-    'оригинальность',
-    'чистая паранойя',
-    'идеи преследования',
-    'идеи отравления',
-    'наивность',
-    'явная паранойя',
-    'скрытая паранойя',
-    'предсказание изменений',
-    'чистая психопатия',
-    'семейная дисгармония',
-    'авторитарная проблема',
-    'явные психопатические отклонения',
-    'скрытые психопатические отклонения',
-    'прогноз шизофрении',
-    'фактор паранойи',
-    'психоневроз',
-    'предубежденность',
-    'фарисейство',
-    'психологические интересы',
-    'паранойяльная шизофрения',
-    'R – второй фактор',
-    'рецидивизм',
-    'социальная ответственность',
-    'ригидность (женская)',
-    'играния роли',
-    'стабильность профиля (женская)',
-    'чистая шизофрения',
-    'социальное отчуждение',
-    'эмоциональное отчуждение',
-    'причудливость сенсорного восприятия',
-    'самоудовлетворенность',
-    'реакция соматизации',
-    'социальная желательность',
-    'социальное участие',
-    'социальный статус',
-    'застенчивость',
-    'толерантность к стрессу',
-    'способность к преподаванию',
-    'защитная реакция на тест',
-    'язвенный тип личности',
-    'низкие способности к достижению цели',
-    'отношение к работе',
-    'стремление наговорить на себя',
-  ];
+class Additional extends StatefulWidget {
+  final String authToken;
 
+  const Additional({super.key, required this.authToken});
 
-  Additional({super.key});
+  @override
+  State<Additional> createState() => _AdditionalState();
+}
+
+class _AdditionalState extends State<Additional> {
+  List<dynamic> categoryResults = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadResults();
+  }
+
+  Future<void> loadResults() async {
+    try {
+      final resultId = await fetchResultId();
+      if (resultId != null) {
+        await fetchCategoryResults(resultId);
+      } else {
+        print("Нет результата у пользователя.");
+      }
+    } catch (e) {
+      print("Ошибка при получении данных: $e");
+    }
+  }
+
+  Future<String?> fetchResultId() async {
+    final url = Uri.parse('http://109.172.7.214:8080/api/v1/result');
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['id'];
+    } else if (response.statusCode == 404) {
+      print('Результат не найден у пользователя');
+      return null;
+    } else {
+      print('Ошибка при получении result_id: ${response.statusCode}');
+      return null;
+    }
+  }
+
+  Future<void> fetchCategoryResults(String resultId) async {
+    final url = Uri.parse(
+        'http://109.172.7.214:8080/api/v1/category_results/other/$resultId');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(utf8.decode(response.bodyBytes));
+      if (mounted) {
+        setState(() {
+          categoryResults = jsonData['category_results'];
+          isLoading = false;
+        });
+      }
+    } else {
+      print('Ошибка при получении категорий: ${response.statusCode}');
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,41 +88,39 @@ class Additional extends StatelessWidget {
       minimum: const EdgeInsets.only(top: 150, bottom: 70),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: GridView.count(
-          crossAxisCount: 2, // 2 элемента в строке
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : GridView.count(
+          crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 0.8, // ширина к высоте
-          children: traits.map((trait) {
+          childAspectRatio: 0.8,
+          children: categoryResults.map((item) {
+            final trait = item['category_name'];
+            final score = item['score'];
+            final max = item['max_score'];
+
             return Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: const Color(0xFF4B4B4B),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [ Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFF8000),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: trait.split(' ').length - 1 > 0
-                        ? Text(
-                      trait,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: 'Gilroy-Medium',
-                        fontSize: 12,
-                        decoration: TextDecoration.none,
-                        color: Colors.white,
-                      ),
-                    )
-                        : FittedBox(
+                    child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         trait,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontFamily: 'Gilroy-Medium',
                           fontSize: 14,
@@ -167,7 +130,39 @@ class Additional extends StatelessWidget {
                       ),
                     ),
                   ),
-                  ]
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CustomPaint(
+                          size: const Size(100, 100),
+                          painter: CircularProgressPainter(
+                            percentage: (score / max) * 100,
+                            backgroundColor: const Color(0xFFFF6C05),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFFF8000),
+                                Color(0xFF663019)
+                              ],
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '$score',
+                          style: const TextStyle(
+                            fontFamily: 'Gilroy-Medium',
+                            fontSize: 18,
+                            decoration: TextDecoration.none,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             );
           }).toList(),
@@ -175,4 +170,50 @@ class Additional extends StatelessWidget {
       ),
     );
   }
+}
+
+// === Кастомный прогресс ===
+
+class CircularProgressPainter extends CustomPainter {
+  final double percentage;
+  final Color backgroundColor;
+  final Gradient gradient;
+
+  CircularProgressPainter({
+    required this.percentage,
+    required this.backgroundColor,
+    required this.gradient,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final strokeWidth = 5.0;
+    final radius = (size.width - strokeWidth) / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+
+    final backgroundPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, radius, backgroundPaint);
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final gradientPaint = Paint()
+      ..shader = gradient.createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 9;
+
+    final sweepAngle = 2 * pi * (percentage / 100);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      sweepAngle,
+      false,
+      gradientPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

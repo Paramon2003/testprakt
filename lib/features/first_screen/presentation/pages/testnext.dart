@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:testprakt/features/first_screen/presentation/pages/testfinish.dart';
 import '../widgets/test.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
@@ -31,13 +32,17 @@ class _TestNextPagesState extends State<TestNextPages> {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       setState(() {
         questionText = data['text'];
-        questionId = data['id']; // Сохраняем ID
+        questionId = data['id'];
         isLoading = false;
         //questionNumber++;
       });
-    } else {
+    } else if (response.statusCode == 404){
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/testfinish');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TestFinish(authToken: token)),
+        );
+        //Navigator.pushReplacementNamed(context, '/testfinish', arguments: token);
       }
     }
   }
@@ -56,6 +61,7 @@ class _TestNextPagesState extends State<TestNextPages> {
         token: token,
         questionId: questionId,
         questionNumber: widget.questionNumber,
+        isLoading: isLoading,
         //questionNumber: questionNumber,
         child: Center(
           child: isLoading
@@ -78,19 +84,20 @@ class _TestNextPagesState extends State<TestNextPages> {
             ),
           ),
         ),
-        fox: Stack(
-          children: const [
-            Positioned(
-              top: 250,
-              child: Center(
-              child: Image(
-                image: AssetImage('assets/test2.png'),
-                width: 300,
-                height: 300,
+        fox: Center(
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: const [
+              Positioned(
+                top: 200,
+                child: Image(
+                  image: AssetImage('assets/test2.png'),
+                  width: 300,
+                  height: 300,
+                ),
               ),
-            ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -29,9 +29,9 @@ class _TestfirstState extends State<Testfirst> {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       setState(() {
         questionText = data['text'];
-        questionId = data['id']; // Сохраняем ID
+        questionId = data['id'];
         isLoading = false;
-        //questionNumber++; // Увеличиваем номер вопроса после загрузки
+        //questionNumber++;
       });
     } else {
       setState(() {
@@ -55,6 +55,7 @@ class _TestfirstState extends State<Testfirst> {
         token: token,
         questionId: questionId,
         questionNumber: 1,
+        isLoading: isLoading,
         child: Center(
           child: isLoading
               ? const CircularProgressIndicator(

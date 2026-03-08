@@ -52,7 +52,7 @@ class BackgroundLayout extends StatelessWidget {
                       ),
                     ),
                   ),
-                  child// <-- Вставляем содержимое текущего окна
+                  child// содержимое текущего окна
                 ],
               ),
             ),

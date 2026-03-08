@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:testprakt/features/first_screen/presentation/pages/share.dart';
 import 'package:testprakt/features/first_screen/presentation/widgets/additional.dart';
 import 'package:testprakt/features/first_screen/presentation/widgets/basic.dart';
 import 'package:testprakt/features/first_screen/presentation/widgets/resultsbox.dart';
@@ -6,7 +7,9 @@ import 'package:testprakt/features/first_screen/presentation/widgets/resultsbox.
 import '../widgets/interpretation.dart';
 
 class Results extends StatefulWidget {
-  const Results({super.key});
+  final String authToken;
+
+  const Results({super.key, required this.authToken});
 
   @override
   State<Results> createState() => _ResultsState();
@@ -78,9 +81,9 @@ class _ResultsState extends State<Results> {
                     },
                   ),
 
-                  if (selectedIndex == 0) Basic(),
-                  if (selectedIndex == 1) Additional(),
-                  if (selectedIndex == 2) Interpretation(),
+                  if (selectedIndex == 0) Basic(authToken: widget.authToken),
+                  if (selectedIndex == 1) Additional(authToken: widget.authToken),
+                  if (selectedIndex == 2) Interpretation(authToken: widget.authToken),
 
                   Positioned(
                     bottom: 20,
@@ -89,7 +92,11 @@ class _ResultsState extends State<Results> {
                     child: Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/share');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Share(authToken: widget.authToken)),
+                          );
+                          //Navigator.pushNamed(context, '/share');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF6C05),
